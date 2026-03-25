@@ -2,47 +2,128 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MindAR A-Frame GLB</title>
+  <title>MindAR Debug Scene</title>
 
   <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
 
-  <!-- MindAR A-Frame -->
+  <!-- MindAR -->
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
   <style>
     body { margin: 0; overflow: hidden; }
+    #debug {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.7);
+      color: #00ffcc;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 12px;
+      z-index: 999;
+    }
   </style>
 </head>
 
 <body>
-  <a-scene 
-    mindar-image="imageTargetSrc: ./assets/targets.mind;"
-    color-space="sRGB"
-    renderer="colorManagement: true, physicallyCorrectLights"
-    vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: false"
-  >
 
-    <!-- Camera -->
-    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+<div id="debug">Initializing...</div>
 
-    <!-- Target Anchor (index 0) -->
-    <a-entity mindar-image-target="targetIndex: 0">
+<a-scene
+  mindar-image="imageTargetSrc: ./targets.mind;"
+  embedded
+  color-space="sRGB"
+  renderer="colorManagement: true, physicallyCorrectLights"
+  vr-mode-ui="enabled: false"
+  device-orientation-permission-ui="enabled: false"
+>
 
-      <!-- 3D Model -->
-      <a-gltf-model 
-        src="./assets/scene.glb"
-        position="0 0 0"
-        scale="0.2 0.2 0.2"
-        rotation="0 0 0"
-      ></a-gltf-model>
+  <!-- Assets -->
+  <a-assets>
+    <a-asset-item id="model" src="./scene.glb"></a-asset-item>
+  </a-assets>
 
-    </a-entity>
+  <!-- Camera -->
+  <a-camera position="0 0 0"></a-camera>
 
-    <!-- Light -->
-    <a-entity light="type: hemisphere; intensity: 1"></a-entity>
+  <!-- Target -->
+  <a-entity id="target" mindar-image-target="targetIndex: 0">
 
-  </a-scene>
+    <!-- DEBUG BOX (always visible if tracking works) -->
+    <a-box 
+      id="debugBox"
+      color="red"
+      depth="0.1"
+      height="0.1"
+      width="0.1"
+      position="0 0 0">
+    </a-box>
+
+    <!-- GLB MODEL -->
+    <a-gltf-model 
+      id="glbModel"
+      src="#model"
+      scale="0.05 0.05 0.05"
+      position="0 0 0"
+      visible="false">
+    </a-gltf-model>
+
+  </a-entity>
+
+  <!-- Lighting -->
+  <a-light type="ambient" intensity="2"></a-light>
+  <a-light type="directional" intensity="1" position="1 1 1"></a-light>
+
+</a-scene>
+
+<script>
+  const debug = document.getElementById("debug");
+  const target = document.getElementById("target");
+  const model = document.getElementById("glbModel");
+
+  function log(msg) {
+    console.log(msg);
+    debug.innerHTML = msg;
+  }
+
+  // TARGET EVENTS
+  target.addEventListener("targetFound", () => {
+    log("✅ Target FOUND");
+  });
+
+  target.addEventListener("targetLost", () => {
+    log("❌ Target LOST");
+  });
+
+  // MODEL LOAD EVENT
+  model.addEventListener("model-loaded", (e) => {
+    log("✅ GLB Loaded");
+
+    // Show model after load
+    model.setAttribute("visible", true);
+
+    // Bounding box debug
+    const mesh = e.detail.model;
+    const box = new THREE.Box3().setFromObject(mesh);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+
+    console.log("Model size:", size);
+
+    debug.innerHTML += `<br>📦 Size: ${size.x.toFixed(2)}, ${size.y.toFixed(2)}, ${size.z.toFixed(2)}`;
+  });
+
+  // ERROR HANDLING
+  model.addEventListener("model-error", () => {
+    log("❌ GLB FAILED TO LOAD");
+  });
+
+  // SCENE READY
+  document.querySelector("a-scene").addEventListener("loaded", () => {
+    log("🚀 Scene Loaded");
+  });
+</script>
+
 </body>
 </html>
