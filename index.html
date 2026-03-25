@@ -60,18 +60,33 @@
 </a-scene>
 
 <script>
-// ===== DEBUG LOGGING =====
-const model = document.querySelector('#debugModel');
+window.addEventListener('load', () => {
 
-// Wait until model is loaded
-model.addEventListener('model-loaded', () => {
-  console.log("✅ GLB LOADED");
+  const scene = document.querySelector('a-scene');
 
-  // Log scale continuously
-  setInterval(() => {
-    const s = model.object3D.scale;
-    console.log(`Scale → x:${s.x.toFixed(3)} y:${s.y.toFixed(3)} z:${s.z.toFixed(3)}`);
-  }, 1000);
+  scene.addEventListener('loaded', () => {
+    console.log("Scene loaded");
+
+    const model = document.querySelector('#debugModel');
+
+    if (!model) {
+      console.log("❌ Model element not found");
+      return;
+    }
+
+    console.log("✅ Model element found");
+
+    model.addEventListener('model-loaded', () => {
+      console.log("✅ GLB LOADED");
+
+      setInterval(() => {
+        const s = model.object3D.scale;
+        console.log(`Scale → x:${s.x.toFixed(3)} y:${s.y.toFixed(3)} z:${s.z.toFixed(3)}`);
+      }, 1000);
+    });
+
+  });
+
 });
 </script>
 
