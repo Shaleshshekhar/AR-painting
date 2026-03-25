@@ -34,19 +34,13 @@
   <a-entity mindar-image-target="targetIndex: 0">
 
     <!-- Debug Box -->
-    <a-box
-      position="0 0 0"
-      depth="0.2"
-      height="0.2"
-      width="0.2"
-      color="red"
-    ></a-box>
+    <a-box position="0 0 0" depth="0.2" height="0.2" width="0.2" color="red"></a-box>
 
-    <!-- 3D MODEL with SCALE ANIMATION -->
+    <!-- MODEL -->
     <a-gltf-model
+      id="debugModel"
       src="#model"
       position="0 0 0.1"
-      rotation="0 0 0"
       scale="0.001 0.001 0.001"
 
       animation="property: scale;
@@ -57,13 +51,29 @@
                  loop: true">
     </a-gltf-model>
 
-    <!-- LIGHTS (IMPORTANT) -->
-    <a-entity light="type: ambient; intensity: 1.5"></a-entity>
-    <a-entity light="type: directional; intensity: 1" position="1 1 1"></a-entity>
+    <!-- LIGHTS -->
+    <a-entity light="type: ambient; intensity: 2"></a-entity>
+    <a-entity light="type: directional; intensity: 1.5" position="1 1 1"></a-entity>
 
   </a-entity>
 
 </a-scene>
+
+<script>
+// ===== DEBUG LOGGING =====
+const model = document.querySelector('#debugModel');
+
+// Wait until model is loaded
+model.addEventListener('model-loaded', () => {
+  console.log("✅ GLB LOADED");
+
+  // Log scale continuously
+  setInterval(() => {
+    const s = model.object3D.scale;
+    console.log(`Scale → x:${s.x.toFixed(3)} y:${s.y.toFixed(3)} z:${s.z.toFixed(3)}`);
+  }, 1000);
+});
+</script>
 
 </body>
 </html>
