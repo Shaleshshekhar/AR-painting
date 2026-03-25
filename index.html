@@ -21,13 +21,25 @@
   vr-mode-ui="enabled: false"
   device-orientation-permission-ui="enabled: false"
 >
-
+  <!-- Assets -->
+  <a-assets>
+    <a-asset-item id="model" src="./scene.glb"></a-asset-item>
+  </a-assets>
   <!-- Camera -->
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
   <!-- Target -->
   <a-entity mindar-image-target="targetIndex: 0">
 
+    <!-- GLB MODEL -->
+    <a-gltf-model 
+      id="glbModel"
+      src="#model"
+      scale="0.5 0.5 0.5"
+      position="0 0 0"
+      visible="false">
+    </a-gltf-model>
+    
     <!-- BOX -->
     <a-box
       position="0 0 0"
