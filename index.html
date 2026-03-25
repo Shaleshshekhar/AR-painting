@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindAR GLB Example</title>
 
-  <!-- A-Frame -->
-  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-
-  <!-- MindAR -->
-  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <!-- MindAR + Three.js -->
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"></script>
 
   <style>
     body { margin: 0; overflow: hidden; }
@@ -15,58 +13,49 @@
 </head>
 
 <body>
+<script>
+  const start = async () => {
+    // Initialize MindAR
+    const mindarThree = new window.MINDAR.IMAGE.MindARThree({
+      container: document.body,
+      imageTargetSrc: './assets/targets.mind',
+    });
 
-<a-scene
-  mindar-image="imageTargetSrc: ./assets/targets.mind;"
-  color-space="sRGB"
-  renderer="colorManagement: true"
-  vr-mode-ui="enabled: false"
-  device-orientation-permission-ui="enabled: false"
->
+    const {renderer, scene, camera} = mindarThree;
 
-  <!-- ===== ASSETS ===== -->
-  <a-assets>
-    <!-- Background Video -->
-    <video id="bgVideo"
-      src="./assets/bg.mp4"
-      autoplay
-      loop
-      muted
-      playsinline
-      webkit-playsinline
-      crossorigin="anonymous">
-    </video>
+    // Anchor for target index 0
+    const anchor = mindarThree.addAnchor(0);
 
-    <!-- 3D Model -->
-    <a-asset-item id="model" src="./assets/scene.glb"></a-asset-item>
-  </a-assets>
+    // Light
+    const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
+    scene.add(light);
 
-  <!-- Camera -->
-  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-<a-entity light="type: ambient; intensity: 1.5"></a-entity>
-<a-entity light="type: directional; intensity: 1" position="1 1 1"></a-entity>
-  <!-- Target -->
-  <a-entity mindar-image-target="targetIndex: 0">
+    // Load GLB model
+    const loader = new THREE.GLTFLoader();
+    loader.load('./assets/scene.glb', (gltf) => {
+      const model = gltf.scene;
 
-    <!-- BG VIDEO -->
-    <a-plane
-      position="0 0 0"
-      width="1"
-      height="0.5"
-      material="shader: flat; src: #bgVideo"
-    ></a-plane>
+      // Adjust scale/position as needed
+      model.scale.set(0.2, 0.2, 0.2);
+      model.position.set(0, 0, 0);
 
-    <!-- 3D MODEL -->
-    <a-gltf-model
-      src="#model"
-      position="0 0 0.1"
-      scale="0.3 0.3 0.3"
-      rotation="0 0 0"
-    ></a-gltf-model>
+      anchor.group.add(model);
+    });
 
-  </a-entity>
+    // Start AR
+    await mindarThree.start();
 
-</a-scene>
+    renderer.setAnimationLoop(() => {
+      renderer.render(scene, camera);
+    });
+  };
+
+  start();
+</script>
+
+<!-- Three.js extras -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.150.1/examples/js/loaders/GLTFLoader.js"></script>
 
 </body>
 </html>
