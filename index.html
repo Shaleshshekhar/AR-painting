@@ -37,19 +37,20 @@
     <a-box position="0 0 0" depth="0.2" height="0.2" width="0.2" color="red"></a-box>
 
     <!-- MODEL -->
-    <a-gltf-model
-      id="debugModel"
-      src="#model"
-      position="0 0 0.1"
-      scale="0.001 0.001 0.001"
+<a-gltf-model
+  id="debugModel"
+  src="#model"
+  position="0 0 0"
 
-      animation="property: scale;
-                 from: 0.001 0.001 0.001;
-                 to: 5 5 5;
-                 dur: 10000;
-                 easing: linear;
-                 loop: true">
-    </a-gltf-model>
+  scale="0.0001 0.0001 0.0001"
+
+  animation="property: scale;
+             from: 0.0001 0.0001 0.0001;
+             to: 50 50 50;
+             dur: 2000;
+             easing: linear;
+             loop: true">
+</a-gltf-model>
 
     <!-- LIGHTS -->
     <a-entity light="type: ambient; intensity: 2"></a-entity>
@@ -76,14 +77,28 @@ window.addEventListener('load', () => {
 
     console.log("✅ Model element found");
 
+    // 🔴 CRITICAL: catch failure
+    model.addEventListener('model-error', (e) => {
+      console.error("❌ MODEL LOAD ERROR:", e.detail);
+    });
+
+    // ✅ success case
     model.addEventListener('model-loaded', () => {
       console.log("✅ GLB LOADED");
 
       setInterval(() => {
         const s = model.object3D.scale;
-        console.log(`Scale → x:${s.x.toFixed(3)} y:${s.y.toFixed(3)} z:${s.z.toFixed(3)}`);
-      }, 1000);
+        console.log(`Scale → x:${s.x.toFixed(2)} y:${s.y.toFixed(2)} z:${s.z.toFixed(2)}`);
+      }, 500);
     });
+
+    // 🔥 fallback: check anyway (even if load fails)
+    setInterval(() => {
+      if (model.object3D) {
+        const s = model.object3D.scale;
+        console.log(`(fallback) Scale → ${s.x.toFixed(2)}`);
+      }
+    }, 1000);
 
   });
 
