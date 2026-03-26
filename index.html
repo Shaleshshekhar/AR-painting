@@ -2,10 +2,11 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>MindAR + Three Debug</title>
 
-  <!-- ✅ Correct scripts -->
+  <!-- ✅ ONLY this MindAR -->
   <script src="https://unpkg.com/mind-ar@1.2.5/dist/mindar-image-three.prod.js"></script>
+
+  <!-- THREE -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.164.0/examples/js/loaders/GLTFLoader.js"></script>
 
@@ -19,10 +20,10 @@
 <script>
 const start = async () => {
 
-  console.log("MINDAR:", window.MINDAR); // 🔍 debug
+  console.log("MINDAR:", window.MINDAR);
 
   if (!window.MINDAR) {
-    alert("MindAR not loaded ❌");
+    alert("MindAR NOT LOADED ❌");
     return;
   }
 
@@ -33,38 +34,16 @@ const start = async () => {
 
   const { renderer, scene, camera } = mindarThree;
 
-  // LIGHT
   const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1.5);
   scene.add(light);
 
   const anchor = mindarThree.addAnchor(0);
 
-  // DEBUG BOX
   const box = new THREE.Mesh(
     new THREE.BoxGeometry(0.2, 0.2, 0.2),
     new THREE.MeshBasicMaterial({ color: "red" })
   );
   anchor.group.add(box);
-
-  // GLB LOADER
-  const loader = new THREE.GLTFLoader();
-
-  loader.load(
-    "./assets/scene.glb",
-    (gltf) => {
-      console.log("✅ GLB LOADED");
-
-      const model = gltf.scene;
-      model.scale.set(0.2, 0.2, 0.2);
-      model.position.set(0, 0, 0.1);
-
-      anchor.group.add(model);
-    },
-    undefined,
-    (err) => {
-      console.error("❌ GLB ERROR:", err);
-    }
-  );
 
   await mindarThree.start();
 
