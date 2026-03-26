@@ -34,7 +34,12 @@
   <a-entity mindar-image-target="targetIndex: 0">
 
     <!-- Debug Box -->
-    <a-box position="0 0 0" depth="0.2" height="0.2" width="0.2" color="red"></a-box>
+    <a-box position="0 0 0" depth="0.2" height="0.2" width="0.2" color="red" animation="property: scale;
+             from: 0.0001 0.0001 0.0001;
+             to: 50 50 50;
+             dur: 2000;
+             easing: linear;
+             loop: true"></a-box>
 
     <!-- MODEL -->
 <a-gltf-model
