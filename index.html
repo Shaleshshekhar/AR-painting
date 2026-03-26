@@ -1,59 +1,134 @@
-<!DOCTYPE html>
 <html>
+
 <head>
-  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- ✅ ONLY this MindAR -->
-  <script src="https://unpkg.com/mind-ar@1.2.5/dist/mindar-image-three.prod.js"></script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { MindARThree } from "../../src/image-target/three.js";
 
-  <!-- THREE -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.164.0/examples/js/loaders/GLTFLoader.js"></script>
+    const frontCameraDeviceSelect = document.querySelector("#frontCameraDeviceSelect");
+    const backCameraDeviceSelect = document.querySelector("#backCameraDeviceSelect");
+
+    let mindarThree = null;
+
+    const setup = () => {
+      const userDeviceId = frontCameraDeviceSelect.value? frontCameraDeviceSelect.value: undefined;
+      const environmentDeviceId = backCameraDeviceSelect.value? backCameraDeviceSelect.value: undefined;
+
+      console.log("setup:", userDeviceId, environmentDeviceId);
+
+      mindarThree = new MindARThree({
+        container: document.querySelector("#container"),
+        imageTargetSrc: './assets/targets.mind',
+        filterMinCF: 1,
+        filterBeta: 10000,
+        missTolerance: 0,
+        warmupTolerance: 0,
+        userDeviceId,
+        environmentDeviceId
+      });
+      const anchor = mindarThree.addAnchor(0);
+      const geometry = new THREE.PlaneGeometry(1, 0.55);
+      const material = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.5 });
+      const plane = new THREE.Mesh(geometry, material);
+      anchor.group.add(plane);
+    }
+    
+    const start = async () => {
+      if (!mindarThree) {
+        setup();
+      }
+      const { renderer, scene, camera } = mindarThree;
+      await mindarThree.start();
+      renderer.setAnimationLoop(() => {
+        renderer.render(scene, camera);
+      });
+    }
+
+    const startButton = document.querySelector("#startButton");
+    startButton.addEventListener("click", () => {
+      start();
+    });
+    
+    const stopButton = document.querySelector("#stopButton");
+    stopButton.addEventListener("click", () => {
+      mindarThree.stop();
+      mindarThree.renderer.setAnimationLoop(null);
+    });
+
+    const switchButton = document.querySelector("#switchButton");
+    switchButton.addEventListener("click", () => {
+      mindarThree.switchCamera();
+    });
+
+    navigator.mediaDevices.enumerateDevices()
+    .then(function(devices) {
+      devices.forEach(function(device) {
+        console.log('device', device);
+
+        if (device.kind === 'videoinput') {
+          const option = document.createElement('option');
+          option.text = device.label || 'camera ' + (frontCameraDeviceSelect.length);
+          option.value = device.deviceId;
+
+          const option2 = document.createElement('option');
+          option2.text = device.label || 'camera ' + (backCameraDeviceSelect.length);
+          option2.value = device.deviceId;
+
+          frontCameraDeviceSelect.appendChild(option);
+          backCameraDeviceSelect.appendChild(option2);
+        }
+
+        console.log(device.kind + ": " + device.label +
+                    " id = " + device.deviceId);
+      });
+    })
+    .catch(function(err) {
+      console.log(err.name + ": " + err.message);
+    });
+
+  </script>
 
   <style>
-    body { margin: 0; overflow: hidden; }
+    body {
+      margin: 0;
+    }
+
+    #container {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #control {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 3;
+    }
   </style>
 </head>
 
 <body>
+  <div id="control">
+    <button id="startButton">Start</button>
+    <button id="stopButton">Stop</button>
+    <button id="switchButton">Switch</button>
 
-<script>
-const start = async () => {
+    Front Camera
+    <select id="frontCameraDeviceSelect">
+      <option value="">Default</option>
+    </select>
+    Back Camera
+    <select id="backCameraDeviceSelect">
+      <option value="">Default</option>
+    </select>
+  </div>
 
-  console.log("MINDAR:", window.MINDAR);
-
-  if (!window.MINDAR) {
-    alert("MindAR NOT LOADED ❌");
-    return;
-  }
-
-  const mindarThree = new window.MINDAR.IMAGE.MindARThree({
-    container: document.body,
-    imageTargetSrc: "./assets/targets.mind",
-  });
-
-  const { renderer, scene, camera } = mindarThree;
-
-  const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1.5);
-  scene.add(light);
-
-  const anchor = mindarThree.addAnchor(0);
-
-  const box = new THREE.Mesh(
-    new THREE.BoxGeometry(0.2, 0.2, 0.2),
-    new THREE.MeshBasicMaterial({ color: "red" })
-  );
-  anchor.group.add(box);
-
-  await mindarThree.start();
-
-  renderer.setAnimationLoop(() => {
-    renderer.render(scene, camera);
-  });
-};
-
-start();
-</script>
-
+  <div id="container">
+  </div>
 </body>
+
 </html>
